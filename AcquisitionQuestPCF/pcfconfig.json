@@ -1,0 +1,16 @@
+{
+  "solution": {
+    "name": "AcquisitionQuestSolution",
+    "version": "1.0.0.0",
+    "includeRootNamespace": true,
+    "namespace": "AcquisitionQuest",
+    "components": [
+      {
+        "path": "./AcquisitionQuestControl",
+        "solution": {
+          "include": ["css/"]
+        }
+      }
+    ]
+  }
+}

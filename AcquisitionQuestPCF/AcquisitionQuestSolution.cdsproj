@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.PowerApps.MSBuild.Solution/1">
+
+  <PropertyGroup>
+    <PowerAppsTargetsPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\PowerApps</PowerAppsTargetsPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SolutionPackageType>Unmanaged</SolutionPackageType>
+    <OutputPath>$(MSBuildThisFileDirectory)out\solutions\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ExcludeDirectories Include="$(MSBuildThisFileDirectory)out\**" />
+    <ExcludeDirectories Include="$(MSBuildThisFileDirectory)node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SolutionProjectReference Include="$(MSBuildThisFileDirectory)AcquisitionQuestControl\*.pcfproj" />
+  </ItemGroup>
+
+  <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.MSBuild.Solution.props"
+          Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.MSBuild.Solution.props')" />
+
+  <Import Project="$(PowerAppsTargetsPath)\Microsoft.PowerApps.MSBuild.Solution.targets"
+          Condition="Exists('$(PowerAppsTargetsPath)\Microsoft.PowerApps.MSBuild.Solution.targets')" />
+
+</Project>

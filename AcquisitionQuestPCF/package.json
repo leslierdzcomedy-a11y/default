@@ -1,0 +1,25 @@
+{
+  "name": "acquisition-quest-pcf",
+  "version": "1.0.0",
+  "description": "PCF code package for the Acquisition Quest — 8-Bit Workforce PowerApp control",
+  "scripts": {
+    "build": "pcf-scripts build",
+    "clean": "pcf-scripts clean",
+    "lint": "pcf-scripts lint",
+    "rebuild": "pcf-scripts rebuild",
+    "start": "pcf-scripts start",
+    "refreshTypes": "pcf-scripts refreshTypes"
+  },
+  "dependencies": {
+    "three": "^0.148.0"
+  },
+  "devDependencies": {
+    "@microsoft/eslint-plugin-power-apps": "^0.2.18",
+    "@types/node": "^16.18.34",
+    "@types/three": "^0.148.0",
+    "eslint": "^8.57.0",
+    "pcf-scripts": "^1",
+    "pcf-start": "^1",
+    "typescript": "~4.9.5"
+  }
+}

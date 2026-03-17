@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+  <control namespace="AcquisitionQuest"
+           constructor="AcquisitionQuestControl"
+           version="1.0.0"
+           display-name-key="AcquisitionQuestControl_DisplayName"
+           description-key="AcquisitionQuestControl_Description"
+           control-type="virtual">
+
+    <!-- ── Input properties ─────────────────────────────────────────── -->
+
+    <property name="autoPlay"
+              display-name-key="Property_AutoPlay_DisplayName"
+              description-key="Property_AutoPlay_Description"
+              of-type="TwoOptions"
+              usage="input"
+              required="false"
+              default-value="true" />
+
+    <property name="showHUD"
+              display-name-key="Property_ShowHUD_DisplayName"
+              description-key="Property_ShowHUD_Description"
+              of-type="TwoOptions"
+              usage="input"
+              required="false"
+              default-value="true" />
+
+    <property name="reducedMotion"
+              display-name-key="Property_ReducedMotion_DisplayName"
+              description-key="Property_ReducedMotion_Description"
+              of-type="TwoOptions"
+              usage="input"
+              required="false"
+              default-value="false" />
+
+    <property name="titleText"
+              display-name-key="Property_TitleText_DisplayName"
+              description-key="Property_TitleText_Description"
+              of-type="SingleLine.Text"
+              usage="input"
+              required="false"
+              default-value="ACQUISITION QUEST" />
+
+    <!-- ── Output properties ────────────────────────────────────────── -->
+
+    <property name="score"
+              display-name-key="Property_Score_DisplayName"
+              description-key="Property_Score_Description"
+              of-type="Whole.None"
+              usage="output"
+              required="false" />
+
+    <property name="level"
+              display-name-key="Property_Level_DisplayName"
+              description-key="Property_Level_Description"
+              of-type="Whole.None"
+              usage="output"
+              required="false" />
+
+    <property name="contractsCollected"
+              display-name-key="Property_ContractsCollected_DisplayName"
+              description-key="Property_ContractsCollected_Description"
+              of-type="Whole.None"
+              usage="output"
+              required="false" />
+
+    <!-- ── Resources ────────────────────────────────────────────────── -->
+    <resources>
+      <code path="index.ts" order="1" />
+      <css path="css/AcquisitionQuestControl.css" order="1" />
+      <library name="three" version="^0.148.0"
+               order="1"
+               uri="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js" />
+    </resources>
+
+    <!-- ── Feature usage ────────────────────────────────────────────── -->
+    <feature-usage>
+      <uses-feature name="WebAPI" required="false" />
+    </feature-usage>
+
+  </control>
+</manifest>
