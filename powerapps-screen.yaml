@@ -1,0 +1,316 @@
+# Power Apps Canvas App - Chat Interface Screen Definition
+# Import this configuration manually by recreating the controls in Power Apps Studio.
+# Each section describes a control, its properties, and the formulas to apply.
+
+App:
+  Name: KnowledgeBaseChatBot
+  Description: A chat interface that answers user questions by searching a SharePoint knowledge base via Power Automate.
+  Theme: CoBalt (or any preferred theme)
+  Orientation: Portrait or Landscape
+  OnStart: |
+    Clear(colMessages);
+    Set(varIsLoading, false);
+    Set(varWelcomeSent, false);
+    If(
+      !varWelcomeSent,
+      Collect(
+        colMessages,
+        {
+          role: "bot",
+          message: "Hello! I'm your Knowledge Base Assistant. Ask me anything and I'll search our knowledge base for an answer.",
+          timestamp: Now()
+        }
+      );
+      Set(varWelcomeSent, true)
+    )
+
+Screens:
+  - Name: ChatScreen
+    Background: White
+    Description: The main chat interface screen.
+
+    Controls:
+
+      # ─── HEADER BAR ───────────────────────────────────────────────────────────
+      - Name: rectHeader
+        Type: Rectangle
+        Properties:
+          X: 0
+          Y: 0
+          Width: Parent.Width
+          Height: 70
+          Fill: ColorValue("#0078D4")   # Microsoft blue
+
+      - Name: lblTitle
+        Type: Label
+        Properties:
+          X: 20
+          Y: 0
+          Width: Parent.Width - 40
+          Height: 70
+          Text: '"Knowledge Base Assistant"'
+          Color: White
+          Size: 18
+          FontWeight: Bold
+          VerticalAlign: VerticalAlign.Middle
+
+      # ─── MESSAGE GALLERY ─────────────────────────────────────────────────────
+      - Name: galMessages
+        Type: Gallery
+        Description: Scrollable gallery that displays the conversation history.
+        Properties:
+          X: 0
+          Y: 70
+          Width: Parent.Width
+          Height: Parent.Height - 150
+          Items: colMessages
+          TemplateSize: 80
+          TemplatePadding: 8
+          Layout: GalleryLayout.Vertical
+          ShowScrollbar: true
+          # Scroll to last item when new messages are added:
+          DefaultScrollbarPosition: 1
+
+        TemplateControls:
+
+          # Bot message bubble (shown on the left)
+          - Name: rectBotBubble
+            Type: Rectangle
+            Properties:
+              Visible: ThisItem.role = "bot"
+              X: 10
+              Y: 8
+              Width: Parent.Width * 0.7
+              Height: lblMessageText.Height + 16
+              Fill: ColorValue("#F0F0F0")
+              RadiusTopLeft: 12
+              RadiusTopRight: 12
+              RadiusBottomLeft: 4
+              RadiusBottomRight: 12
+
+          # User message bubble (shown on the right)
+          - Name: rectUserBubble
+            Type: Rectangle
+            Properties:
+              Visible: ThisItem.role = "user"
+              X: Parent.Width - (Parent.Width * 0.7) - 10
+              Y: 8
+              Width: Parent.Width * 0.7
+              Height: lblMessageText.Height + 16
+              Fill: ColorValue("#0078D4")
+              RadiusTopLeft: 12
+              RadiusTopRight: 12
+              RadiusBottomLeft: 12
+              RadiusBottomRight: 4
+
+          - Name: lblMessageText
+            Type: Label
+            Properties:
+              X: |
+                If(
+                  ThisItem.role = "bot",
+                  18,
+                  Parent.Width - (Parent.Width * 0.7) - 10 + 8
+                )
+              Y: 16
+              Width: Parent.Width * 0.7 - 16
+              Height: Self.Height   # auto-height
+              AutoHeight: true
+              Text: ThisItem.message
+              Color: |
+                If(ThisItem.role = "bot", ColorValue("#333333"), White)
+              Size: 13
+              Wrap: true
+
+          - Name: lblTimestamp
+            Type: Label
+            Properties:
+              X: |
+                If(
+                  ThisItem.role = "bot",
+                  18,
+                  Parent.Width - (Parent.Width * 0.7) - 10 + 8
+                )
+              Y: lblMessageText.Y + lblMessageText.Height + 2
+              Width: Parent.Width * 0.7 - 16
+              Height: 16
+              Text: Text(ThisItem.timestamp, "h:mm AM/PM")
+              Color: ColorValue("#888888")
+              Size: 10
+
+          # Bot avatar icon
+          - Name: imgBotIcon
+            Type: Icon
+            Icon: Robot   # or use an image if available
+            Properties:
+              Visible: ThisItem.role = "bot"
+              X: Parent.Width * 0.7 + 14
+              Y: 10
+              Width: 30
+              Height: 30
+              Color: ColorValue("#0078D4")
+
+      # ─── LOADING INDICATOR ───────────────────────────────────────────────────
+      - Name: lblTypingIndicator
+        Type: Label
+        Properties:
+          Visible: varIsLoading
+          X: 20
+          Y: galMessages.Y + galMessages.Height - 30
+          Width: 200
+          Height: 24
+          Text: '"Bot is typing..."'
+          Color: ColorValue("#888888")
+          Italic: true
+          Size: 12
+
+      # ─── INPUT BAR ───────────────────────────────────────────────────────────
+      - Name: rectInputBar
+        Type: Rectangle
+        Properties:
+          X: 0
+          Y: Parent.Height - 80
+          Width: Parent.Width
+          Height: 80
+          Fill: ColorValue("#F8F8F8")
+          BorderColor: ColorValue("#E0E0E0")
+          BorderThickness: 1
+
+      - Name: txtUserInput
+        Type: TextInput
+        Properties:
+          X: 12
+          Y: Parent.Height - 68
+          Width: Parent.Width - 72
+          Height: 44
+          HintText: '"Type your question here..."'
+          BorderRadius: 22
+          BorderColor: ColorValue("#CCCCCC")
+          FocusedBorderColor: ColorValue("#0078D4")
+          Fill: White
+          Size: 13
+          Mode: TextMode.MultiLine
+          MaxLength: 500
+          OnChange: ""   # no action on change
+          # Allow pressing Enter to submit (handled by button)
+
+      - Name: btnSend
+        Type: Button
+        Properties:
+          X: Parent.Width - 56
+          Y: Parent.Height - 66
+          Width: 44
+          Height: 44
+          Text: '"➤"'
+          Fill: ColorValue("#0078D4")
+          HoverFill: ColorValue("#005A9E")
+          PressedFill: ColorValue("#004578")
+          Color: White
+          RadiusTopLeft: 22
+          RadiusTopRight: 22
+          RadiusBottomLeft: 22
+          RadiusBottomRight: 22
+          DisplayMode: |
+            If(IsBlank(txtUserInput.Text) || varIsLoading, DisplayMode.Disabled, DisplayMode.Edit)
+          OnSelect: |
+            // 1. Guard against empty input
+            If(IsBlank(Trim(txtUserInput.Text)), Notify("Please type a question first.", NotificationType.Warning));
+
+            // 2. Capture and clear the input
+            Set(varCurrentQuestion, Trim(txtUserInput.Text));
+            Reset(txtUserInput);
+
+            // 3. Add the user message to the conversation
+            Collect(
+              colMessages,
+              {
+                role: "user",
+                message: varCurrentQuestion,
+                timestamp: Now()
+              }
+            );
+
+            // 4. Show loading state
+            Set(varIsLoading, true);
+
+            // 5. Call Power Automate flow
+            Set(
+              varFlowResponse,
+              ChatBot_KnowledgeBase_Search.Run(varCurrentQuestion)
+            );
+
+            // 6. Add bot response to the conversation
+            Collect(
+              colMessages,
+              {
+                role: "bot",
+                message: varFlowResponse.answer,
+                timestamp: Now()
+              }
+            );
+
+            // 7. Clear loading state
+            Set(varIsLoading, false)
+
+      # ─── CLEAR CHAT BUTTON ───────────────────────────────────────────────────
+      - Name: btnClearChat
+        Type: Button
+        Properties:
+          X: Parent.Width - 90
+          Y: 15
+          Width: 70
+          Height: 40
+          Text: '"Clear"'
+          Fill: Transparent
+          HoverFill: ColorValue("#005A9E")
+          Color: White
+          Size: 12
+          OnSelect: |
+            Clear(colMessages);
+            Collect(
+              colMessages,
+              {
+                role: "bot",
+                message: "Chat cleared. How can I help you?",
+                timestamp: Now()
+              }
+            )
+
+Variables:
+  - Name: varCurrentQuestion
+    Type: Text
+    Description: Holds the user's current question before sending to the flow.
+
+  - Name: varFlowResponse
+    Type: Record
+    Description: Stores the response object returned by the Power Automate flow.
+
+  - Name: varIsLoading
+    Type: Boolean
+    Default: false
+    Description: Controls the typing indicator and disables the send button while waiting for a response.
+
+  - Name: varWelcomeSent
+    Type: Boolean
+    Default: false
+    Description: Prevents the welcome message from being added more than once.
+
+Collections:
+  - Name: colMessages
+    Description: |
+      Collection that stores the entire chat history for the current session.
+      Each record has: { role: "user" | "bot", message: Text, timestamp: DateTime }
+    ClearedOnAppStart: true   # starts fresh each session
+
+PowerAutomateConnections:
+  - FlowName: ChatBot-KnowledgeBase-Search
+    Description: |
+      This flow must be added to the app via the Power Automate panel in Power Apps Studio.
+      Steps:
+        1. Open the app in Power Apps Studio.
+        2. In the left sidebar, click the lightning bolt icon (Power Automate).
+        3. Click 'Add flow' and select 'ChatBot-KnowledgeBase-Search'.
+        4. The flow will become available as: ChatBot_KnowledgeBase_Search.Run(userQuestion)
+    ReturnProperties:
+      - answer: string    # the answer text to display
+      - matchFound: boolean  # whether a KB match was found

@@ -1,0 +1,198 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "metadata": {
+    "flowName": "ChatBot-KnowledgeBase-Search",
+    "description": "Accepts a user question from a Power App, searches the ChatKnowledgeBase SharePoint list for matching keywords, and returns the best matching answer.",
+    "triggerType": "PowerApps (V2)",
+    "author": "PowerApps Chat Solution",
+    "version": "1.0"
+  },
+  "trigger": {
+    "type": "PowerAppsV2",
+    "inputs": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "UserQuestion": {
+            "type": "string",
+            "description": "The question submitted by the user in the Power App chat interface."
+          }
+        },
+        "required": ["UserQuestion"]
+      }
+    }
+  },
+  "actions": {
+    "Initialize_UserQuestion": {
+      "type": "InitializeVariable",
+      "order": 1,
+      "inputs": {
+        "variables": [
+          {
+            "name": "varUserQuestion",
+            "type": "string",
+            "value": "@{triggerBody()['UserQuestion']}"
+          }
+        ]
+      },
+      "description": "Store the incoming user question in a variable."
+    },
+    "Initialize_BestAnswer": {
+      "type": "InitializeVariable",
+      "order": 2,
+      "inputs": {
+        "variables": [
+          {
+            "name": "varBestAnswer",
+            "type": "string",
+            "value": "I'm sorry, I couldn't find an answer to your question. Please contact support for further assistance."
+          }
+        ]
+      },
+      "description": "Default answer if no match is found."
+    },
+    "Initialize_MatchFound": {
+      "type": "InitializeVariable",
+      "order": 3,
+      "inputs": {
+        "variables": [
+          {
+            "name": "varMatchFound",
+            "type": "boolean",
+            "value": false
+          }
+        ]
+      }
+    },
+    "Compose_LowerQuestion": {
+      "type": "Compose",
+      "order": 4,
+      "inputs": "@toLower(variables('varUserQuestion'))",
+      "description": "Normalize the question to lowercase for case-insensitive matching."
+    },
+    "Get_KB_Items": {
+      "type": "ApiConnection",
+      "order": 5,
+      "inputs": {
+        "host": {
+          "connectionName": "shared_sharepointonline",
+          "operationId": "GetItems",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline"
+        },
+        "parameters": {
+          "dataset": "YOUR_SHAREPOINT_SITE_URL",
+          "table": "ChatKnowledgeBase",
+          "$filter": "IsActive eq 1",
+          "$orderby": "Priority asc",
+          "$top": 100
+        }
+      },
+      "description": "Retrieve all active knowledge base entries, ordered by priority."
+    },
+    "Apply_to_each_KB_Item": {
+      "type": "Foreach",
+      "order": 6,
+      "foreach": "@outputs('Get_KB_Items')?['body/value']",
+      "description": "Iterate over each KB item to check for keyword matches.",
+      "actions": {
+        "Condition_Already_Matched": {
+          "type": "If",
+          "order": 1,
+          "expression": {
+            "equals": ["@variables('varMatchFound')", false]
+          },
+          "description": "Only process if we haven't found a match yet (first-match wins).",
+          "actions": {
+            "Compose_Keywords": {
+              "type": "Compose",
+              "order": 1,
+              "inputs": "@split(toLower(items('Apply_to_each_KB_Item')?['Title']), ',')",
+              "description": "Split the Title (keywords) by comma into an array."
+            },
+            "Apply_to_each_Keyword": {
+              "type": "Foreach",
+              "order": 2,
+              "foreach": "@outputs('Compose_Keywords')",
+              "description": "Check each individual keyword against the user's question.",
+              "actions": {
+                "Condition_Keyword_Match": {
+                  "type": "If",
+                  "order": 1,
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": ["@variables('varMatchFound')", false]
+                      },
+                      {
+                        "contains": [
+                          "@outputs('Compose_LowerQuestion')",
+                          "@trim(item())"
+                        ]
+                      }
+                    ]
+                  },
+                  "description": "If the user's question contains the keyword, set the answer.",
+                  "actions": {
+                    "Set_BestAnswer": {
+                      "type": "SetVariable",
+                      "order": 1,
+                      "inputs": {
+                        "name": "varBestAnswer",
+                        "value": "@items('Apply_to_each_KB_Item')?['Answer']"
+                      }
+                    },
+                    "Set_MatchFound_True": {
+                      "type": "SetVariable",
+                      "order": 2,
+                      "inputs": {
+                        "name": "varMatchFound",
+                        "value": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Respond_to_PowerApp": {
+      "type": "Response",
+      "order": 7,
+      "inputs": {
+        "statusCode": 200,
+        "body": {
+          "Answer": "@variables('varBestAnswer')",
+          "MatchFound": "@variables('varMatchFound')"
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "Answer": {
+              "type": "string",
+              "description": "The answer to display in the chat."
+            },
+            "MatchFound": {
+              "type": "boolean",
+              "description": "Whether a matching KB entry was found."
+            }
+          }
+        }
+      },
+      "description": "Return the answer back to the calling Power App."
+    }
+  },
+  "setupInstructions": [
+    "1. In Power Automate, click 'Create' > 'Instant cloud flow'.",
+    "2. Name the flow 'ChatBot-KnowledgeBase-Search'.",
+    "3. Choose 'PowerApps (V2)' as the trigger.",
+    "4. Add an input: Name = 'UserQuestion', Type = Text.",
+    "5. Add the actions described in this JSON in order.",
+    "6. In the 'Get items' SharePoint action, replace 'YOUR_SHAREPOINT_SITE_URL' with your actual SharePoint site URL.",
+    "7. Set the list name to 'ChatKnowledgeBase'.",
+    "8. Save and test the flow.",
+    "9. Copy the flow's HTTP POST URL — you will use it in the Power App.",
+    "10. In the Power App, reference this flow via the 'Power Automate' connector panel."
+  ]
+}

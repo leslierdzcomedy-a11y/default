@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PowerApps Chat Bot – Setup Guide</title>
+  <style>
+    :root {
+      --ms-blue: #0078D4;
+      --ms-blue-dark: #005A9E;
+      --ms-blue-light: #EFF6FC;
+      --text: #323130;
+      --text-light: #605E5C;
+      --border: #E1DFDD;
+      --bg: #FAF9F8;
+      --white: #ffffff;
+      --green: #107C10;
+      --green-light: #F1FAF1;
+      --orange: #CA5010;
+      --orange-light: #FFF4CE;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ──────────────────────────────────────────────────────────── */
+    header {
+      background: var(--ms-blue);
+      color: var(--white);
+      padding: 28px 40px 24px;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    header p  { opacity: .85; font-size: 15px; max-width: 640px; }
+
+    /* ── LAYOUT ──────────────────────────────────────────────────────────── */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── ARCHITECTURE OVERVIEW ───────────────────────────────────────────── */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 32px 0;
+    }
+    .arch-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px 20px;
+    }
+    .arch-card .icon { font-size: 32px; margin-bottom: 10px; }
+    .arch-card h3 { font-size: 15px; font-weight: 700; color: var(--ms-blue); margin-bottom: 4px; }
+    .arch-card .role {
+      font-size: 12px; font-weight: 600; color: var(--text-light);
+      text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px;
+    }
+    .arch-card p { font-size: 13px; color: var(--text-light); }
+
+    /* ── SECTION HEADINGS ────────────────────────────────────────────────── */
+    h2 {
+      font-size: 20px; font-weight: 700; color: var(--text);
+      margin: 40px 0 16px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--ms-blue);
+      display: flex; align-items: center; gap: 10px;
+    }
+    h2 .step-num {
+      background: var(--ms-blue); color: var(--white);
+      border-radius: 50%; width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ── STEP CARDS ──────────────────────────────────────────────────────── */
+    .steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+    .step {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 6px; padding: 14px 18px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .step-n {
+      background: var(--ms-blue-light); color: var(--ms-blue);
+      font-weight: 700; font-size: 13px;
+      min-width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .step p { font-size: 14px; }
+    .step code, code {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1px 6px; font-size: 13px;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+    }
+
+    /* ── NOTE BOXES ──────────────────────────────────────────────────────── */
+    .note {
+      border-radius: 6px; padding: 14px 18px; font-size: 14px;
+      margin: 16px 0; display: flex; gap: 10px; align-items: flex-start;
+    }
+    .note.tip  { background: var(--green-light);   border-left: 4px solid var(--green); }
+    .note.warn { background: var(--orange-light);  border-left: 4px solid var(--orange); }
+    .note.info { background: var(--ms-blue-light); border-left: 4px solid var(--ms-blue); }
+    .note-icon { font-size: 18px; flex-shrink: 0; }
+    .note strong { font-weight: 700; display: block; margin-bottom: 2px; }
+
+    /* ── CODE BLOCK ──────────────────────────────────────────────────────── */
+    pre {
+      background: #1e1e1e; color: #d4d4d4; border-radius: 6px;
+      padding: 18px 20px; overflow-x: auto; font-size: 13px;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      margin: 12px 0; line-height: 1.5;
+    }
+    pre .kw  { color: #569cd6; }
+    pre .str { color: #ce9178; }
+    pre .cmt { color: #6a9955; }
+    pre .fn  { color: #dcdcaa; }
+    pre .var { color: #9cdcfe; }
+
+    /* ── FILES TABLE ─────────────────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0; }
+    th { background: var(--ms-blue); color: var(--white); text-align: left; padding: 10px 14px; font-weight: 600; }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--white); }
+    tr:last-child td { border-bottom: none; }
+
+    h3 { font-size: 16px; margin: 24px 0 10px; }
+
+    footer {
+      text-align: center; padding: 24px; font-size: 12px;
+      color: var(--text-light); border-top: 1px solid var(--border); margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Solution Guide</div>
+  <h1>&#9889; PowerApps Knowledge Base Chat Bot</h1>
+  <p>A low-code chat interface built with Power Apps + Power Automate + SharePoint that lets users ask questions and get instant answers from your organisation's knowledge base.</p>
+</header>
+
+<main>
+
+  <!-- ARCHITECTURE -->
+  <h2><span class="step-num">&#9733;</span> Architecture Overview</h2>
+
+  <div class="arch-grid">
+    <div class="arch-card">
+      <div class="icon">&#x1F4AC;</div>
+      <div class="role">Frontend</div>
+      <h3>Power Apps</h3>
+      <p>Canvas app embedded in SharePoint. Provides the chat UI: message bubbles, text input, and send button.</p>
+    </div>
+    <div class="arch-card" style="border-color: var(--ms-blue); background: var(--ms-blue-light);">
+      <div class="icon">&#x26A1;</div>
+      <div class="role">Logic / Brain</div>
+      <h3>Power Automate</h3>
+      <p>Triggered by the app. Searches SharePoint for keyword matches and returns the best answer.</p>
+    </div>
+    <div class="arch-card">
+      <div class="icon">&#x1F4CB;</div>
+      <div class="role">Knowledge Base</div>
+      <h3>SharePoint List</h3>
+      <p>Stores Q&amp;A pairs. Each row has keywords and a corresponding answer. No code required to update.</p>
+    </div>
+  </div>
+
+  <div class="note info">
+    <span class="note-icon">&#x2139;&#xFE0F;</span>
+    <div>
+      <strong>Prerequisites</strong>
+      You need a Microsoft 365 account with access to Power Apps, Power Automate, and SharePoint Online. No premium connectors are required — this solution uses only standard connectors.
+    </div>
+  </div>
+
+  <!-- FILES -->
+  <h2><span class="step-num">0</span> Included Files</h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th><th>How to use</th></tr>
+    <tr>
+      <td><code>sharepoint-list-schema.json</code></td>
+      <td>Column definitions + sample data for the knowledge base list</td>
+      <td>Reference when creating the SharePoint list</td>
+    </tr>
+    <tr>
+      <td><code>power-automate-flow.json</code></td>
+      <td>Complete flow action definitions with logic</td>
+      <td>Reference when building the flow step-by-step</td>
+    </tr>
+    <tr>
+      <td><code>powerapps-screen.yaml</code></td>
+      <td>Full screen layout, controls, and Power Fx formulas</td>
+      <td>Reference when building the canvas app</td>
+    </tr>
+    <tr>
+      <td><code>setup-guide.html</code></td>
+      <td>This setup guide (open in any browser)</td>
+      <td>Read &amp; follow the steps below</td>
+    </tr>
+  </table>
+
+  <!-- STEP 1 -->
+  <h2><span class="step-num">1</span> Create the SharePoint Knowledge Base List</h2>
+
+  <div class="steps">
+    <div class="step"><div class="step-n">1</div><p>Go to your SharePoint site and click <strong>New &rarr; List &rarr; Blank list</strong>.</p></div>
+    <div class="step"><div class="step-n">2</div><p>Name the list exactly: <code>ChatKnowledgeBase</code>. Click <strong>Create</strong>.</p></div>
+    <div class="step"><div class="step-n">3</div><p>Add a <strong>Multiple lines of text</strong> column named <code>Answer</code>.</p></div>
+    <div class="step"><div class="step-n">4</div><p>Add a <strong>Choice</strong> column named <code>Category</code> with choices: <code>General, HR, IT, Finance, Operations, Other</code>.</p></div>
+    <div class="step"><div class="step-n">5</div><p>Add a <strong>Number</strong> column named <code>Priority</code> (default value: <code>1</code>).</p></div>
+    <div class="step"><div class="step-n">6</div><p>Add a <strong>Yes/No</strong> column named <code>IsActive</code> (default: <code>Yes</code>).</p></div>
+    <div class="step"><div class="step-n">7</div><p>Populate the list using <code>sharepoint-list-schema.json</code> as a reference. The <strong>Title</strong> column holds comma-separated keywords.</p></div>
+  </div>
+
+  <div class="note tip">
+    <span class="note-icon">&#x2705;</span>
+    <div>
+      <strong>Tip – Writing good keywords</strong>
+      Separate keywords with commas: <code>password reset, forgot password, login help</code>. The flow checks if any keyword is contained within the user's question. Avoid short common words like "the" or "is".
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <h2><span class="step-num">2</span> Build the Power Automate Flow</h2>
+
+  <div class="steps">
+    <div class="step"><div class="step-n">1</div><p>Go to <strong>flow.microsoft.com</strong> &rarr; <strong>Create &rarr; Instant cloud flow</strong>.</p></div>
+    <div class="step"><div class="step-n">2</div><p>Name it <code>ChatBot-KnowledgeBase-Search</code>. Select trigger: <strong>Power Apps (V2)</strong>. Click <strong>Create</strong>.</p></div>
+    <div class="step"><div class="step-n">3</div><p>In the trigger, add an input: <strong>Name</strong> = <code>UserQuestion</code>, <strong>Type</strong> = <em>Text</em>.</p></div>
+    <div class="step"><div class="step-n">4</div><p>Add action: <strong>Initialize variable</strong> &rarr; name <code>varBestAnswer</code>, type <em>String</em>, value = your fallback message (e.g. "I couldn't find an answer, please contact support.").</p></div>
+    <div class="step"><div class="step-n">5</div><p>Add action: <strong>Initialize variable</strong> &rarr; name <code>varMatchFound</code>, type <em>Boolean</em>, value <code>false</code>.</p></div>
+    <div class="step"><div class="step-n">6</div><p>Add action: <strong>Compose</strong> &rarr; expression: <code>toLower(triggerBody()['UserQuestion'])</code>. This normalises the question to lowercase.</p></div>
+    <div class="step"><div class="step-n">7</div><p>Add action: <strong>SharePoint &ndash; Get items</strong>. Set Site to your SharePoint URL, List to <code>ChatKnowledgeBase</code>, Filter Query to <code>IsActive eq 1</code>, Order By to <code>Priority asc</code>, Top Count to <code>100</code>.</p></div>
+    <div class="step"><div class="step-n">8</div><p>Add action: <strong>Apply to each</strong> over the Get Items output. Inside the loop, add a <strong>Condition</strong>: <code>varMatchFound</code> equals <code>false</code>.</p></div>
+    <div class="step"><div class="step-n">9</div><p>Inside the "Yes" branch, add another <strong>Apply to each</strong> over <code>split(toLower(items()?['Title']), ',')</code>.</p></div>
+    <div class="step"><div class="step-n">10</div><p>Inside the inner loop, add a <strong>Condition</strong>: <code>contains(outputs('Compose'), trim(item()))</code> AND <code>varMatchFound equals false</code>.</p></div>
+    <div class="step"><div class="step-n">11</div><p>In the "Yes" branch: <strong>Set variable</strong> <code>varBestAnswer</code> to <code>items()?['Answer']</code>, then <strong>Set variable</strong> <code>varMatchFound</code> to <code>true</code>.</p></div>
+    <div class="step"><div class="step-n">12</div><p>After the outer loop, add: <strong>Respond to a PowerApp or flow</strong>. Add two outputs: <code>answer</code> (Text) = <code>varBestAnswer</code>; <code>matchFound</code> (Boolean) = <code>varMatchFound</code>.</p></div>
+    <div class="step"><div class="step-n">13</div><p><strong>Save</strong> and run a test with a sample question to verify the response.</p></div>
+  </div>
+
+  <div class="note warn">
+    <span class="note-icon">&#x26A0;&#xFE0F;</span>
+    <div>
+      <strong>Important – Concurrency settings</strong>
+      Do <em>not</em> enable concurrency on the "Apply to each" loops. Parallel execution causes race conditions when reading/writing the <code>varMatchFound</code> variable.
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <h2><span class="step-num">3</span> Build the Power Apps Canvas App</h2>
+
+  <div class="steps">
+    <div class="step"><div class="step-n">1</div><p>Go to <strong>make.powerapps.com &rarr; Create &rarr; Blank app &rarr; Blank canvas app</strong>. Name it <code>KnowledgeBaseChatBot</code>.</p></div>
+    <div class="step"><div class="step-n">2</div><p>Add a <strong>Rectangle</strong> at the top (height 70 px, fill <code>#0078D4</code>) as the header. Add a white bold <strong>Label</strong> on top: <code>"Knowledge Base Assistant"</code>.</p></div>
+    <div class="step"><div class="step-n">3</div><p>Add a <strong>Vertical Gallery</strong> below the header. Set <strong>Items</strong> to <code>colMessages</code>. Enable auto-grow template height.</p></div>
+    <div class="step"><div class="step-n">4</div><p>Inside the gallery template, add two <strong>Rectangles</strong> (bot bubbles on left, user bubbles on right) and a <strong>Label</strong> for message text. Use <code>ThisItem.role</code> to control visibility and colour.</p></div>
+    <div class="step"><div class="step-n">5</div><p>Add a <strong>Text Input</strong> at the bottom for the user's question. HintText: <code>"Type your question here..."</code>.</p></div>
+    <div class="step"><div class="step-n">6</div><p>Add a <strong>Send Button</strong> next to the input with the OnSelect formula below.</p></div>
+    <div class="step"><div class="step-n">7</div><p>Set the <strong>App OnStart</strong> formula below.</p></div>
+    <div class="step"><div class="step-n">8</div><p>In the left sidebar, click the <strong>&#x26A1; Power Automate</strong> icon &rarr; <strong>Add flow</strong> &rarr; select <code>ChatBot-KnowledgeBase-Search</code>.</p></div>
+    <div class="step"><div class="step-n">9</div><p><strong>Save and Preview</strong> (F5) to test the app.</p></div>
+  </div>
+
+  <h3>App OnStart Formula</h3>
+  <pre><span class="cmt">// Initialise an empty messages collection with a welcome message</span>
+<span class="fn">Clear</span>(<span class="var">colMessages</span>);
+<span class="fn">Set</span>(<span class="var">varIsLoading</span>, <span class="kw">false</span>);
+<span class="fn">Collect</span>(
+    <span class="var">colMessages</span>,
+    {
+        role: <span class="str">"bot"</span>,
+        message: <span class="str">"Hello! I'm your Knowledge Base Assistant. Ask me anything!"</span>,
+        timestamp: <span class="fn">Now</span>()
+    }
+)</pre>
+
+  <h3>Send Button OnSelect Formula</h3>
+  <pre><span class="cmt">// Guard: skip if empty or already loading</span>
+<span class="kw">If</span>(<span class="fn">IsBlank</span>(<span class="fn">Trim</span>(txtUserInput.Text)) || <span class="var">varIsLoading</span>, <span class="kw">Return</span>);
+
+<span class="cmt">// Capture and clear the input</span>
+<span class="fn">Set</span>(<span class="var">varCurrentQuestion</span>, <span class="fn">Trim</span>(txtUserInput.Text));
+<span class="fn">Reset</span>(txtUserInput);
+
+<span class="cmt">// Add user message to chat</span>
+<span class="fn">Collect</span>(<span class="var">colMessages</span>, {
+    role: <span class="str">"user"</span>,
+    message: <span class="var">varCurrentQuestion</span>,
+    timestamp: <span class="fn">Now</span>()
+});
+
+<span class="cmt">// Show loading indicator</span>
+<span class="fn">Set</span>(<span class="var">varIsLoading</span>, <span class="kw">true</span>);
+
+<span class="cmt">// Call the Power Automate flow</span>
+<span class="fn">Set</span>(
+    <span class="var">varFlowResponse</span>,
+    ChatBot_KnowledgeBase_Search.<span class="fn">Run</span>(<span class="var">varCurrentQuestion</span>)
+);
+
+<span class="cmt">// Add bot response to chat</span>
+<span class="fn">Collect</span>(<span class="var">colMessages</span>, {
+    role: <span class="str">"bot"</span>,
+    message: <span class="var">varFlowResponse</span>.answer,
+    timestamp: <span class="fn">Now</span>()
+});
+
+<span class="cmt">// Hide loading indicator</span>
+<span class="fn">Set</span>(<span class="var">varIsLoading</span>, <span class="kw">false</span>)</pre>
+
+  <!-- STEP 4 -->
+  <h2><span class="step-num">4</span> Embed the App in SharePoint</h2>
+
+  <div class="steps">
+    <div class="step"><div class="step-n">1</div><p>In Power Apps Studio, click <strong>File &rarr; Save &rarr; Publish</strong>.</p></div>
+    <div class="step"><div class="step-n">2</div><p>Click <strong>Share</strong> and share the app with your organisation or specific users/groups.</p></div>
+    <div class="step"><div class="step-n">3</div><p>On your SharePoint page, click <strong>Edit &rarr; + Add a new web part</strong>.</p></div>
+    <div class="step"><div class="step-n">4</div><p>Search for and select the <strong>Power Apps</strong> web part.</p></div>
+    <div class="step"><div class="step-n">5</div><p>Paste your app's URL or search for it by name. Click <strong>Add</strong>.</p></div>
+    <div class="step"><div class="step-n">6</div><p>Resize the web part and click <strong>Republish</strong> on the SharePoint page.</p></div>
+  </div>
+
+  <!-- STEP 5 -->
+  <h2><span class="step-num">5</span> Maintaining the Knowledge Base</h2>
+  <p style="margin-bottom:12px; color: var(--text-light); font-size: 14px;">No code changes needed to update Q&amp;A content. Simply edit the SharePoint list:</p>
+
+  <table>
+    <tr><th>Action</th><th>What to do</th></tr>
+    <tr><td>Add a new Q&amp;A</td><td>Add a new row to <code>ChatKnowledgeBase</code>. Fill in the keywords (Title) and the Answer.</td></tr>
+    <tr><td>Disable an answer</td><td>Set <code>IsActive</code> to <em>No</em> — the bot skips it without deleting your work.</td></tr>
+    <tr><td>Change priority</td><td>Set a lower <code>Priority</code> number to make that answer match first when multiple entries could match.</td></tr>
+    <tr><td>Refine keywords</td><td>Edit the <code>Title</code> field to add or remove comma-separated keywords.</td></tr>
+  </table>
+
+  <div class="note tip">
+    <span class="note-icon">&#x2705;</span>
+    <div>
+      <strong>Best practices</strong>
+      Keep keywords specific. Use 3–5 specific terms per entry and test regularly by asking the bot questions a real user might ask. Use the <code>Priority</code> column to control which answer wins when multiple entries match.
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Power Apps + Power Automate + SharePoint Knowledge Base Chat Bot — setup guide
+</footer>
+
+</body>
+</html>

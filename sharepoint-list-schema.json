@@ -1,0 +1,91 @@
+{
+  "listName": "ChatKnowledgeBase",
+  "description": "Knowledge base for the PowerApps chat bot. Each item contains keywords and a corresponding answer.",
+  "columns": [
+    {
+      "internalName": "Title",
+      "displayName": "Question / Keywords",
+      "type": "Single line of text",
+      "required": true,
+      "description": "The question or keywords that trigger this answer. Separate multiple keywords with commas."
+    },
+    {
+      "internalName": "Answer",
+      "displayName": "Answer",
+      "type": "Multiple lines of text",
+      "richText": false,
+      "required": true,
+      "description": "The answer to return when the keywords are matched."
+    },
+    {
+      "internalName": "Category",
+      "displayName": "Category",
+      "type": "Choice",
+      "required": false,
+      "choices": ["General", "HR", "IT", "Finance", "Operations", "Other"],
+      "defaultValue": "General",
+      "description": "Optional category to group related Q&A pairs."
+    },
+    {
+      "internalName": "Priority",
+      "displayName": "Priority",
+      "type": "Number",
+      "required": false,
+      "defaultValue": 1,
+      "description": "Priority for ordering results when multiple matches are found. Lower number = higher priority."
+    },
+    {
+      "internalName": "IsActive",
+      "displayName": "Is Active",
+      "type": "Yes/No",
+      "required": false,
+      "defaultValue": true,
+      "description": "Set to No to disable this Q&A pair without deleting it."
+    }
+  ],
+  "sampleData": [
+    {
+      "Title": "hours, office hours, when open",
+      "Answer": "Our office is open Monday to Friday, 9:00 AM to 5:00 PM Eastern Time.",
+      "Category": "General",
+      "Priority": 1,
+      "IsActive": true
+    },
+    {
+      "Title": "contact, phone number, email, reach",
+      "Answer": "You can reach our team at support@yourcompany.com or call us at (555) 123-4567.",
+      "Category": "General",
+      "Priority": 1,
+      "IsActive": true
+    },
+    {
+      "Title": "password reset, forgot password, login help",
+      "Answer": "To reset your password, go to the IT portal at https://itportal.yourcompany.com and click 'Forgot Password'. If you need further help, contact IT at it-support@yourcompany.com.",
+      "Category": "IT",
+      "Priority": 1,
+      "IsActive": true
+    },
+    {
+      "Title": "vacation, PTO, time off, leave request",
+      "Answer": "To request time off, submit a request through the HR portal. Please submit requests at least 2 weeks in advance. For questions, contact HR at hr@yourcompany.com.",
+      "Category": "HR",
+      "Priority": 1,
+      "IsActive": true
+    },
+    {
+      "Title": "expense, reimbursement, receipt",
+      "Answer": "Submit expense reports via the Finance portal within 30 days of the expense. Attach all receipts and include the business purpose. Approvals typically take 5-7 business days.",
+      "Category": "Finance",
+      "Priority": 1,
+      "IsActive": true
+    }
+  ],
+  "setupInstructions": [
+    "1. Navigate to your SharePoint site.",
+    "2. Click 'New' > 'List'.",
+    "3. Choose 'Blank list' and name it 'ChatKnowledgeBase'.",
+    "4. Add the columns described above (Title already exists by default).",
+    "5. Populate with your Q&A content using the sample data as a guide.",
+    "6. Note the SharePoint site URL and list name — you will need these when configuring the Power Automate flow."
+  ]
+}
